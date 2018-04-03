@@ -8,15 +8,15 @@
 */
 
 
-#define BOARD_UNO
+#define BOARD_STM32  // FOR STM32DUINO
 
 
 const float targetLambda = 1.0; // Narrowband simulation, cross point in lambda
 const float widebandTop = 2.0; // Where the +5v of the linear wideband output is
 
 const int warmUpDelay = 20000; // Initial delay we wait before starting heating of the sensor, in millis
-const int initialRampUpTill = 255 / 14.0 * 7.5; // Heater warm up stage, this sets the top (TODO: Measure input voltage, max output should be 7.5v)
-const int initialRampUpStep = 255 / (14.0 / 0.5); // Heater warm up stage, this is how fast the voltage ramps up per second, spec sheet says .5v a second).
+const int initialRampUpTill = 65535 / 14.0 * 7.5; // Heater warm up stage, this sets the top (TODO: Measure input voltage, max output should be 7.5v)
+const int initialRampUpStep = 65535 / (14.0 / 0.5); // Heater warm up stage, this is how fast the voltage ramps up per second, spec sheet says .5v a second).
 
 double heatTarget = 2.3 / 1300.0 * 200.0; // Target voltage, this is pulse voltage divided by total target resistance, times the target cell resistance
 int heatSampleTime = 500; // How often the heater is sampled for PID, in milliseconds
@@ -50,10 +50,10 @@ const int POUT_WIDE = PIN_D1; // Analog Out - Wideband linear output
 
 
 
-#elif defined(BOARD_UNO)
-const int PIN_VGND = A0; // Analog In - Level of the virtual ground
-const int PIN_VS = A1; // Analog In - Reads Nernst Cell voltage
-const int PIN_IPA = A2; // Analog In - Measures pump current via differential amp
+#elif defined(BOARD_STM32)
+const int PIN_VGND = PA0; // Analog In - Level of the virtual ground
+const int PIN_VS = PA1; // Analog In - Reads Nernst Cell voltage
+const int PIN_IPA = PA2; // Analog In - Measures pump current via differential amp
 
 // Sensor control
 const int POUT_VS = 7; // Digital Out - Pulses Nernst Cell to calculate internal resistance
@@ -61,8 +61,8 @@ const int POUT_HEATER = 5; // Analog Out - Heater control, keeps Nernst cell at 
 const int POUT_IP = 6; // Analog Out - Pump cell current output, keeps Nernst cell in stoich range
 
 // Outputs
-const int POUT_NARROW = 2; // Digital Out - Feeds voltage divider, 0-1v signal to ECU
-const int POUT_WIDE = 9; // Analog Out - Wideband linear output
+const int POUT_NARROW = PB0; // Digital Out - Feeds voltage divider, 0-1v signal to ECU
+const int POUT_WIDE = PB1; // Analog Out - Wideband linear output
 
 
 
@@ -93,7 +93,7 @@ RunningAverage ipaavg(pumpSampleTime/speedOfLoop*5);
 RunningAverage nernstavg(pumpSampleTime/speedOfLoop);
 
 float volts(int adc) {
-  return adc / 1024.0 * 5.0;
+  return adc / 4095.0 * 3.3;
 }
 
 float vGndVolts() {
